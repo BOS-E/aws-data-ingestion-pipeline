@@ -1,0 +1,9 @@
+{
+    "bookingId": "UUID",
+    "userId": "UserID",
+    "propertyId": "PropertyID",
+    "location": "City, Country",
+    "startDate": "YYYY-MM-DD",
+    "endDate": "YYYY-MM-DD",
+    "price": "Price in USD"
+}
