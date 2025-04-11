@@ -1,0 +1,37 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.13
+    commands:
+      - echo "Installing dependencies..."
+      - mkdir -p lib1 lib2
+      - pip install -r requirements.txt -t lib1
+      - cp -r lib1 lib2
+
+  build:
+    commands:
+      - echo "Zipping producer_lambda (produce-booking-data)..."
+      - cd lib1
+      - zip -r9 ../produce_booking_package.zip .
+      - cd ..
+      - zip -g produce_booking_package.zip producer_lambda.py
+
+      - echo "Zipping processFilteredBooking..."
+      - cd lib2
+      - zip -r9 ../process_filtered_package.zip .
+      - cd ..
+      - zip -g process_filtered_package.zip processFilteredBooking.py
+
+  post_build:
+    commands:
+      - echo "Uploading zip files to S3..."
+      - aws s3 cp produce_booking_package.zip s3://lamda-zip-for-codebuild/
+      - aws s3 cp process_filtered_package.zip s3://lamda-zip-for-codebuild/
+
+      - echo "Updating Lambda functions via S3..."
+      - aws lambda update-function-code --function-name produce-booking-data --s3-bucket lamda-zip-for-codebuild --s3-key produce_booking_package.zip
+      - aws lambda update-function-code --function-name processFilteredBookings --s3-bucket lamda-zip-for-codebuild --s3-key process_filtered_package.zip
+
+      - echo "Deployment complete!"

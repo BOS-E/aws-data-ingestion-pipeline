@@ -23,7 +23,7 @@ The pipeline generates fake booking records, filters them based on booking durat
 ## 📈 Pipeline Flow
 
 1. **Producer Lambda** generates random booking records and sends them to an **SQS Queue**.
-2. **EventBridge Pipe** reads from SQS, filters out bookings with duration ≤ 1 day.
+2. **EventBridge Pipe** reads from SQS, filters out bookings with duration > 15 days.
 3. Filtered data is passed to a **Consumer Lambda**, which stores it as a `.csv` in **Amazon S3**.
 4. If Lambda processing fails 3 times, the message is moved to the **DLQ**.
 5. **AWS CodeBuild** automates deployment from a GitHub repo.
