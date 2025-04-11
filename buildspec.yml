@@ -5,28 +5,31 @@ phases:
     runtime-versions:
       python: 3.13
     commands:
-      - echo "Installing dependencies..."
-      - mkdir -p lib1 lib2
-      - pip install -r requirements.txt -t lib1
-      - cp -r lib1 lib2
+      - echo "Installing dependencies for Lambda 1..."
+      - pip install -r lambda1/requirements.txt -t lambda1/lib
+
+      - echo "Installing dependencies for Lambda 2..."
+      - pip install -r lambda2/requirements.txt -t lambda2/lib
 
   build:
     commands:
-      - echo "Zipping producer_lambda (produce-booking-data)..."
-      - cd lib1
-      - zip -r9 ../produce_booking_package.zip .
+      - echo "Packaging Lambda 1: produce-booking-data..."
+      - cd lambda1/lib
+      - zip -r9 ../../produce_booking_package.zip .
       - cd ..
-      - zip -g produce_booking_package.zip producer_lambda.py
+      - zip -g ../produce_booking_package.zip producer_lambda.py
+      - cd ..
 
-      - echo "Zipping processFilteredBooking..."
-      - cd lib2
-      - zip -r9 ../process_filtered_package.zip .
+      - echo "Packaging Lambda 2: processFilteredBookings..."
+      - cd lambda2/lib
+      - zip -r9 ../../process_filtered_package.zip .
       - cd ..
-      - zip -g process_filtered_package.zip processFilteredBooking.py
+      - zip -g ../process_filtered_package.zip processFilteredBooking.py
+      - cd ..
 
   post_build:
     commands:
-      - echo "Uploading zip files to S3..."
+      - echo "Uploading ZIPs to S3..."
       - aws s3 cp produce_booking_package.zip s3://lamda-zip-for-codebuild/
       - aws s3 cp process_filtered_package.zip s3://lamda-zip-for-codebuild/
 
